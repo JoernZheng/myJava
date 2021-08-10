@@ -817,6 +817,43 @@ public class Solution {
         }
     }
 
+    // 用队列实现栈
+    class MyQueue {
+        Stack<Integer> stack, backup;
+
+        /** Initialize your data structure here. */
+        public MyQueue() {
+            stack = new Stack<>();
+            backup = new Stack<>();
+        }
+
+        /** Push element x to the back of queue. */
+        public void push(int x) {
+            while (!stack.isEmpty()){
+                backup.push(stack.pop());
+            }
+            backup.push(x);
+            while(!backup.isEmpty()){
+                stack.push(backup.pop());
+            }
+        }
+
+        /** Removes the element from in front of queue and returns that element. */
+        public int pop() {
+            return stack.pop();
+        }
+
+        /** Get the front element. */
+        public int peek() {
+            return stack.peek();
+        }
+
+        /** Returns whether the queue is empty. */
+        public boolean empty() {
+            return stack.isEmpty();
+        }
+    }
+
     // 图节点
     class Node {
         public int val;
