@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Solution {
+    private int count = 0;
+
     // 只出现一次的数字
     public int singleNumber(int[] nums) {
         int result = 0;
@@ -241,6 +243,8 @@ public class Solution {
         return myCloneGraph(node, new HashMap<>());
     }
 
+    // 目标和
+
     public Node myCloneGraph(Node node, Map<Integer, Node> visited) {
         // 这种情况实际上只有头节点会出现
         if (node == null) return null;
@@ -260,10 +264,6 @@ public class Solution {
         }
     }
 
-    // 目标和
-
-    private int count = 0;
-
     public int findTargetSumWays(int[] nums, int target) {
         findTargetSumWaysDFS(nums, 0, nums.length - 1, target);
         return count;
@@ -280,16 +280,6 @@ public class Solution {
         }
         findTargetSumWaysDFS(nums, start + 1, end, target - nums[start]);
         findTargetSumWaysDFS(nums, start + 1, end, target + nums[start]);
-    }
-
-    public static class ListNode {
-        int val;
-        ListNode next;
-
-        ListNode(int x) {
-            val = x;
-            next = null;
-        }
     }
 
     public List<List<Integer>> threeSum(int[] nums) {
@@ -473,24 +463,6 @@ public class Solution {
         Arrays.sort(nums1);
     }
 
-    public List<Integer> inorderTraversal(TreeNode root) {
-        List<Integer> result = new LinkedList<>();
-
-        if (root == null) return result;
-        getResult(root, result);
-
-        return result;
-    }
-
-    public void getResult(TreeNode root, List<Integer> result) {
-        if (root.left != null) {
-            getResult(root.left, result);
-        }
-        result.add(root.val);
-        if (root.right != null) {
-            getResult(root.right, result);
-        }
-    }
 
     public boolean isSameTree(TreeNode p, TreeNode q) {
         if (p == null && q == null) {
@@ -528,18 +500,6 @@ public class Solution {
         } else {
             return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
         }
-    }
-
-    // 升序数组转二叉搜索树
-    public TreeNode sortedArrayToBST(int[] nums) {
-        if (nums.length == 0) {
-            return null;
-        }
-        int middle = nums.length / 2;
-        TreeNode root = new TreeNode(nums[middle]);
-        root.left = sortedArrayToBST(Arrays.copyOfRange(nums, 0, Math.max(0, middle)));
-        root.right = sortedArrayToBST(Arrays.copyOfRange(nums, middle + 1, Math.max(middle + 1, nums.length)));
-        return root;
     }
 
     // 岛屿的数量
@@ -743,6 +703,45 @@ public class Solution {
         return count;
     }
 
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> result = new LinkedList<>();
+
+        if (root == null) return result;
+        getResult(root, result);
+
+        return result;
+    }
+
+    public void getResult(TreeNode root, List<Integer> result) {
+        if (root.left != null) {
+            getResult(root.left, result);
+        }
+        result.add(root.val);
+        if (root.right != null) {
+            getResult(root.right, result);
+        }
+    }
+
+    // 升序数组转二叉搜索树
+    public TreeNode sortedArrayToBST(int[] nums) {
+        if (nums.length == 0) {
+            return null;
+        }
+        int middle = nums.length / 2;
+        TreeNode root = new TreeNode(nums[middle]);
+        root.left = sortedArrayToBST(Arrays.copyOfRange(nums, 0, Math.max(0, middle)));
+        root.right = sortedArrayToBST(Arrays.copyOfRange(nums, middle + 1, Math.max(middle + 1, nums.length)));
+        return root;
+    }
+
+    // 平衡二叉树
+    public boolean isBalanced(TreeNode root) {
+        // 递归做法，思路：左树平衡+右树平衡+左右树高度差为1
+        // 采用自下而上的递归方法可以保证height的调用次数为O(n)次，而自上而下最差的情况为O(n^2)
+        // 在计算过程中，用不可及的值进行判定，当某侧高度为不可及值时，则说明该侧不平衡，直接通过短路原则返回所有的递归调用（编程关键）
+        return height(root) != -1;
+    }
+
     public void findLandsDFS(char[][] grid, int i, int j) {
         if (grid[i][j] == '1') {
             grid[i][j] = '0';
@@ -758,6 +757,358 @@ public class Solution {
             if (j > 0) {
                 findLandsDFS(grid, i, j - 1);
             }
+        }
+    }
+
+    public String findDifferentBinaryString(String[] nums) {
+        if (nums == null || nums.length == 0) return null;
+        if (nums.length == 1) return String.valueOf((Integer.parseInt(nums[0]) + 1) % 2);
+        Set<Integer> set = new HashSet<>();
+        for (String s : nums) {
+            set.add(Integer.parseInt(s, 2));
+        }
+
+        int max = (int) Math.pow(2, nums[0].length()) - 1;
+        for (int i = 0; i <= max; i++) {
+            if (!set.contains(i)) {
+                StringBuilder result = new StringBuilder();
+                result.append(Integer.toBinaryString(i));
+                while (result.length() <= nums[0].length()) {
+                    result.insert(0, "0");
+                }
+                return result.toString();
+            }
+        }
+        return null;
+    }
+
+    public int minimizeTheDifference(int[][] mat, int target) {
+        Deque<Integer> queue = new LinkedList<>();
+        Deque<Integer> result = new LinkedList<>();
+        queue.offer(0);
+        result.offer(-target);
+        int row = -1;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            int bestLineAns = 999999;
+            row++;
+            while (size-- > 0) {
+                queue.remove();
+                // 将下一列入栈
+                if (row < mat.length) {
+                    int last_result = result.poll();
+                    for (int num : mat[row]) {
+                        int current_result = last_result + num;
+                        if (current_result > 0 && Math.abs(current_result) >= bestLineAns) {
+                            // 如果当前结果大于0且当前的结果已经不是行最优解时，可以直接抛弃
+                            // 因为加法会使得其结果越来越偏离最优解（因为此时是全联接状态）
+                            continue;
+                        }
+                        queue.offer(num);
+                        result.offer(current_result);
+                        if (Math.abs(current_result) < bestLineAns) {
+                            bestLineAns = Math.abs(current_result);
+                        }
+                    }
+                }
+            }
+        }
+        // 最后在所有结果中找出最优解
+        int ans = Math.abs(result.poll());
+        while (!result.isEmpty()) {
+            if (ans > Math.abs(result.element())) {
+                ans = Math.abs(result.poll());
+            } else {
+                result.remove();
+            }
+        }
+
+        return ans;
+    }
+
+    // 中序遍历的非递归写法
+    public List<Integer> inorderTraversal2(TreeNode root) {
+        if (root == null)
+            return new LinkedList<Integer>();
+        List<Integer> result = new LinkedList<>();
+        Deque<TreeNode> stack = new LinkedList<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode current = stack.peek();
+            while ((current = current.left) != null) {
+                stack.push(current);
+            }
+            // 当无右树时不断弹栈
+            while (!stack.isEmpty()) {
+                current = stack.pop();
+                result.add(current.val);
+                if (current.right != null) {
+                    stack.push(current.right);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    // 787. K 站中转内最便宜的航班 —— 动态规划
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        // index = 0使用，k代表中转次数，边=中转次数+1，所以初始化时需要使用k+2
+        // int[k+2][n] => 经过k次中转到达城市n的最小花费
+        // int[n][k+2] => 到达城市n经过k次中转所需的最小花费，在解题过程中因为以中转次数作为状态转移的方向，所以该表示方法不如上面一种
+        final int PRICE_INFINITY = 10000 * 101 + 1;
+        int[][] dp = new int[k + 2][n];
+        for (int[] temp : dp) {
+            Arrays.fill(temp, PRICE_INFINITY);
+        }
+        dp[0][src] = 0;
+        for (int i = 1; i < k + 2; i++) {
+            for (int[] flight : flights) {
+                int from = flight[0], to = flight[1], cost = flight[2];
+                dp[i][to] = Math.min(dp[i][to], dp[i - 1][from] + cost);
+            }
+        }
+        int ans = PRICE_INFINITY;
+        for (int i = 1; i < k + 2; i++) {
+            if (dp[i][dst] < ans) {
+                ans = dp[i][dst];
+            }
+        }
+        return ans == PRICE_INFINITY ? -1 : ans;
+    }
+
+    // LC-03
+    public int lengthOfLongestSubstring(String s) {
+        int temp = 0, max = 0;
+        if (s == null || s.length() == 0)
+            return 0;
+        if (s.length() == 1)
+            return 1;
+
+        // <char, times>
+        Map<Character, Integer> map = new HashMap<>();
+        char[] chars = s.toCharArray();
+
+        int head = 0, tail = 0;
+        while (tail < s.length()) {
+            // 当前节点有效
+            if (map.get(chars[tail]) == null || map.get(chars[tail]) == 0) {
+                map.put(chars[tail], 1);
+                temp++;
+                if (temp > max) {
+                    max = temp;
+                }
+            } else {
+                // 当前节点无效，需要不断循环搜索，直到当前字符有效
+                map.put(chars[tail], 2);
+                temp++;
+                while (map.get(chars[tail]) == 2) {
+                    map.put(chars[head], map.get(chars[head]) - 1);
+                    head++;
+                    temp--;
+                }
+            }
+            tail++;
+        }
+        return max;
+    }
+
+    public int findKthLargest(int[] nums, int k) {
+        quickSort(nums);
+        return nums[nums.length - k];
+    }
+
+    public void quickSort(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        partition(nums, left, right);
+    }
+
+    public void partition(int[] nums, int left, int right) {
+        if (nums.length == 1 || left == right)
+            return;
+        int key = nums[left];
+        int p_left = left, p_right = right;
+        // 相等时相当于需要把key放到对应的位置上，然后继续分治
+        while (p_left < p_right) {
+            while (p_left < p_right && nums[p_right] > key) {
+                p_right--;
+            }
+            nums[p_left++] = nums[p_right];
+            while (p_left < p_right && nums[p_left] <= key) {
+                p_left++;
+            }
+            nums[p_right--] = nums[p_left];
+        }
+        nums[p_left] = key;
+        partition(nums, left, p_left - 1);
+        partition(nums, p_right + 1, right);
+    }
+
+    // 787. K 站中转内最便宜的航班 - 广度优先搜索 - 超限
+//    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+//        List<List<int[]>> ordered_flights = getOrderedFlights(flights);
+//        Deque<Integer> costs = new LinkedList<>();
+//        Deque<int[]> queue = new LinkedList<>();
+//        List<Integer> result = new ArrayList<>();
+//        // 记忆化搜索
+//        int[][] memo = new int[flights.length][flights[0].length];
+//        for (int[] flight : flights) {
+//            if (flight[0] == src) {
+//                // [src, des, price]
+//                queue.add(flight);
+//                costs.add(0);
+//            }
+//        }
+//        while (!queue.isEmpty() && k-- >= 0) {
+//            int size = queue.size();
+//            while (size-- > 0) {
+//                int[] current_line = queue.poll();
+//                int current_cost = costs.poll();
+//                current_cost = current_cost + current_line[2];
+//                if (current_line[1] == dst) {
+//                    // 到达目的地
+//                    result.add(current_cost);
+//                } else if (k >= 0) {
+//                    // 将后续的路线压入栈中
+//                    for (int[] flight : getNextLine(current_line[1], ordered_flights)) {
+//                        queue.add(flight);
+//                        costs.add(current_cost);
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (!result.isEmpty()) {
+//            Integer[] results = result.toArray(new Integer[0]);
+//            Arrays.sort(results);
+//            return results[0];
+//        } else {
+//            return -1;
+//        }
+//    }
+//
+//    public List<List<int[]>> getOrderedFlights(int[][] flights) {
+//        // 下标下面挂着相同的src的链表
+//        List<List<int[]>> arrayList = new ArrayList<>();
+//        // 需要多初始化一个
+//        for (int i = 0; i < 101; i++) {
+//            List<int[]> list = new ArrayList<>();
+//            arrayList.add(i, list);
+//        }
+//        for (int[] flight : flights) {
+//            int src = flight[0];
+//            arrayList.get(src).add(flight);
+//        }
+//        return arrayList;
+//    }
+//
+//    public int[][] getNextLine(int des, List<List<int[]>> ordered_flights) {
+//        int size = ordered_flights.get(des).size();
+//        int[][] next_lines = ordered_flights.get(des).toArray(new int[size][3]);
+//        return next_lines;
+//    }
+
+    public int findKthLargest_MaxHeap(int[] nums, int k) {
+        // 建堆
+        buildHeap(nums);
+        // 删除K - 1次头节点
+        for (int i = 0; i < k; i++) {
+            deleteHeapTop(nums);
+        }
+        return nums[0];
+    }
+
+    public void buildHeap(int nums[]) {
+        for (int i = nums.length / 2; i >= 0; i--) {
+            maxHeapify(nums, i);
+        }
+    }
+
+    public int[] deleteHeapTop(int nums[]) {
+        nums[0] = nums[nums.length - 1];
+        nums = Arrays.copyOfRange(nums, 0, nums.length - 1);
+        for (int i = nums.length / 2; i >= 0; i--) {
+            maxHeapify(nums, i);
+        }
+        return nums;
+    }
+
+    public void maxHeapify(int nums[], int index) {
+        int left = 2 * index + 1, right = 2 * index + 2;
+        if (left < nums.length - 1 && nums[left] > nums[index]) {
+            int temp = nums[index];
+            nums[index] = nums[left];
+            nums[left] = temp;
+        }
+        if (right < nums.length - 1 && nums[right] > nums[index]) {
+            int temp = nums[index];
+            nums[index] = nums[right];
+            nums[right] = temp;
+        }
+    }
+
+    // LC-56 合并区间
+    // 基本解法：1.排序，2.按条件更新或者追加区间
+    public int[][] merge(int[][] intervals) {
+        if (intervals.length == 0) {
+            return null;
+        }
+        Arrays.sort(intervals, (o1, o2) -> o1[0] - o2[0]);
+        List<int[]> result = new LinkedList<>();
+        result.add(intervals[0]);
+        for (int i = 1; i < intervals.length; i++) {
+            int l = intervals[i][0], r = intervals[i][1];
+            if (l > result.get(result.size() - 1)[1]) {
+                // 新元素
+                result.add(new int[]{l, r});
+            } else {
+                result.get(result.size() - 1)[1] = Math.max(result.get(result.size() - 1)[1], r);
+            }
+        }
+        return result.toArray(new int[result.size()][]);
+    }
+
+    // LC-53 最大子序和
+    public int maxSubArray(int[] nums) {
+        return getArrayInfo(nums, 0, nums.length - 1).mSum;
+    }
+
+    public Status getArrayInfo(int[] nums, int left, int right) {
+        if (left == right) {
+            return new Status(nums[left], nums[left], nums[left], nums[left]);
+        }
+        int middle = (left + right) >> 1;
+        Status leftStatus = getArrayInfo(nums, left, middle - 1);
+        Status rightStatus = getArrayInfo(nums, middle, right);
+        return combineResult(leftStatus, rightStatus);
+    }
+
+    public Status combineResult(Status left, Status right) {
+        int tSum = left.tSum + right.tSum;
+        int lSum = Math.max(left.lSum, left.tSum + right.lSum);
+        int rSum = Math.max(right.rSum, right.tSum + left.rSum);
+        int mSum = Math.max(left.rSum + right.lSum, Math.max(left.mSum, right.mSum));
+        return new Status(lSum, rSum, mSum, tSum);
+    }
+
+    public boolean containsDuplicate(int[] nums) {
+        Map<String, Object> map = new HashMap<>();
+        Set<Integer> set = new HashSet<>();
+        for (int i : nums) {
+            if (!set.add(i))
+                return true;
+        }
+        return false;
+    }
+
+    public static class ListNode {
+        int val;
+        ListNode next;
+
+        ListNode(int x) {
+            val = x;
+            next = null;
         }
     }
 
@@ -780,6 +1131,7 @@ public class Solution {
             this.right = right;
         }
     }
+
 
     // 最小栈
     class MinStack {
@@ -821,34 +1173,44 @@ public class Solution {
     class MyQueue {
         Stack<Integer> stack, backup;
 
-        /** Initialize your data structure here. */
+        /**
+         * Initialize your data structure here.
+         */
         public MyQueue() {
             stack = new Stack<>();
             backup = new Stack<>();
         }
 
-        /** Push element x to the back of queue. */
+        /**
+         * Push element x to the back of queue.
+         */
         public void push(int x) {
-            while (!stack.isEmpty()){
+            while (!stack.isEmpty()) {
                 backup.push(stack.pop());
             }
             backup.push(x);
-            while(!backup.isEmpty()){
+            while (!backup.isEmpty()) {
                 stack.push(backup.pop());
             }
         }
 
-        /** Removes the element from in front of queue and returns that element. */
+        /**
+         * Removes the element from in front of queue and returns that element.
+         */
         public int pop() {
             return stack.pop();
         }
 
-        /** Get the front element. */
+        /**
+         * Get the front element.
+         */
         public int peek() {
             return stack.peek();
         }
 
-        /** Returns whether the queue is empty. */
+        /**
+         * Returns whether the queue is empty.
+         */
         public boolean empty() {
             return stack.isEmpty();
         }
@@ -873,5 +1235,95 @@ public class Solution {
             val = _val;
             neighbors = _neighbors;
         }
+    }
+
+    class LRUCache {
+        LRUNode head, tail;
+        Map<Integer, LRUNode> map;
+        int maxSize;
+
+        public LRUCache(int capacity) {
+            head = new LRUNode(-1, -1);
+            tail = new LRUNode(-2, -2);
+            head.after = tail;
+            tail.before = head;
+            map = new HashMap<>();
+            maxSize = capacity;
+        }
+
+        public int get(int key) {
+            LRUNode node = map.get(key);
+            if (node == null) {
+                return -1;
+            } else {
+                refresh(node);
+                return node.val;
+            }
+        }
+
+        public void put(int key, int value) {
+            // 插入head，淘汰tail
+            // 键存在，替换
+            if (map.containsKey(key)) {
+                LRUNode node = map.get(key);
+                node.val = value;
+                refresh(node);
+            } else {
+                // 键不存在，先插入再选择性删除
+                LRUNode node = new LRUNode(key, value);
+                node.before = head;
+                node.after = head.after;
+                head.after = node;
+                node.after.before = node;
+                map.put(key, node);
+                if (map.size() > maxSize) {
+                    LRUNode temp = tail.before;
+                    tail.before = temp.before;
+                    temp.before.after = tail;
+                    temp.after = null;
+                    temp.before = null;
+                    map.remove(temp.key);
+                }
+            }
+        }
+
+        public void refresh(LRUNode node) {
+            node.before.after = node.after;
+            node.after.before = node.before;
+            node.before = head;
+            node.after = head.after;
+            head.after = node;
+            node.after.before = node;
+        }
+
+        class LRUNode {
+            int val;
+            int key;    // 在删除的时候用于同时删除hashmap中的值使用
+            LRUNode before;
+            LRUNode after;
+
+            public LRUNode(int K, int V) {
+                key = K;
+                val = V;
+                before = null;
+                after = null;
+            }
+        }
+    }
+
+    /**
+     * LC-53 最大子序和的辅助类
+     */
+    class Status {
+        // 左侧开始最大子序和、右侧开始最大子序和、区间最大子序和、区间和
+        int lSum, rSum, mSum, tSum;
+
+        public Status(int l, int r, int m, int t) {
+            this.lSum = l;
+            this.rSum = r;
+            this.mSum = m;
+            this.tSum = t;
+        }
+
     }
 }
