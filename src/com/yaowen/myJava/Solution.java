@@ -1102,6 +1102,66 @@ public class Solution {
         return false;
     }
 
+    /**
+     * LC-498 对角线遍历
+     */
+    public int[] findDiagonalOrder(int[][] mat) {
+        int x = 0, y = 0;
+        int length = mat.length - 1;
+        boolean flag = true;
+        int[] result = new int[mat.length * mat.length];
+        int index = 0;
+        while (x <= length || y <= length) {
+            System.out.println(Arrays.toString(result));
+            if (flag) {
+                result[index++] = mat[y--][x++];
+                if (y < 0 || x > length) {
+                    y = 0;
+                    flag = false;
+                    while (x > length) {
+                        x--;
+                        y++;
+                    }
+                }
+            } else {
+                System.out.println("x=" + x + "  y=" + y);
+                result[index++] = mat[y++][x--];
+                if (x < 0 || y > length) {
+                    x = 0;
+                    flag = true;
+                    while (y > length) {
+                        y--;
+                        x++;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * LC-566 重塑矩阵
+     */
+    public int[][] matrixReshape(int[][] mat, int r, int c) {
+        if (mat == null) {
+            return null;
+        } else if (mat.length * mat[0].length != r * c) {
+            return mat;
+        }
+
+        int[][] result = new int[r][c];
+        int mr = mat.length;
+        int mc = mat[0].length;
+
+        for (int index = 0; index < r * c; index++) {
+            result[index / c][index % c] = mat[index / mc][index % mc];
+        }
+
+        return result;
+
+    }
+
     public static class ListNode {
         int val;
         ListNode next;
@@ -1131,7 +1191,6 @@ public class Solution {
             this.right = right;
         }
     }
-
 
     // 最小栈
     class MinStack {
