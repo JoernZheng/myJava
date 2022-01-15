@@ -1,5 +1,6 @@
 package com.yaowen.myJava;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1151,7 +1152,6 @@ public class Solution {
         }
 
         int[][] result = new int[r][c];
-        int mr = mat.length;
         int mc = mat[0].length;
 
         for (int index = 0; index < r * c; index++) {
@@ -1160,6 +1160,37 @@ public class Solution {
 
         return result;
 
+    }
+
+    public String reverseWords(String s) {
+        StringBuilder sb = new StringBuilder();
+        String[] ss = s.split(" ");
+        arrayReverser(ss);
+        for (String temp : ss) {
+            temp = temp.replace(" ", "");
+            if (temp.equals("")) {
+                continue;
+            }
+            sb.append(temp);
+            sb.append(" ");
+        }
+        return sb.deleteCharAt(sb.length() - 1).toString();
+    }
+
+    public <T> void arrayReverser(T[] a) {
+        int left = 0, right = a.length - 1;
+        while (left < right) {
+            T temp = a[left];
+            a[left++] = a[right];
+            a[right--] = temp;
+        }
+    }
+
+    public int totalMoney(int n) {
+        int wholeWeeks = n / 7;
+        int restDays = n % 7;
+        Double result = 3.5 * wholeWeeks * wholeWeeks + 24.5 * wholeWeeks + restDays * (wholeWeeks + 1.0) + (restDays - 1.0) * restDays / 2.0;
+        return result.intValue();
     }
 
     public static class ListNode {
