@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Solution {
+    /**
+     * LC-1220 Count Vowels Permutation
+     */
+    int vowel_factor = (int) 1e9 + 7;
     private int count = 0;
 
     // 只出现一次的数字
@@ -236,6 +240,8 @@ public class Solution {
         return -1;
     }
 
+    // 目标和
+
     // 克隆图
     public Node cloneGraph(Node node) {
         // 使用辅助函数来实现真正的逻辑
@@ -243,8 +249,6 @@ public class Solution {
         // 哈希表以“值”（唯一）为主键，以Node节点地址为值，有助于方便后续插入操作
         return myCloneGraph(node, new HashMap<>());
     }
-
-    // 目标和
 
     public Node myCloneGraph(Node node, Map<Integer, Node> visited) {
         // 这种情况实际上只有头节点会出现
@@ -463,7 +467,6 @@ public class Solution {
         System.arraycopy(nums2, 0, nums1, m, n);
         Arrays.sort(nums1);
     }
-
 
     public boolean isSameTree(TreeNode p, TreeNode q) {
         if (p == null && q == null) {
@@ -925,27 +928,6 @@ public class Solution {
         partition(nums, left, right);
     }
 
-    public void partition(int[] nums, int left, int right) {
-        if (nums.length == 1 || left == right)
-            return;
-        int key = nums[left];
-        int p_left = left, p_right = right;
-        // 相等时相当于需要把key放到对应的位置上，然后继续分治
-        while (p_left < p_right) {
-            while (p_left < p_right && nums[p_right] > key) {
-                p_right--;
-            }
-            nums[p_left++] = nums[p_right];
-            while (p_left < p_right && nums[p_left] <= key) {
-                p_left++;
-            }
-            nums[p_right--] = nums[p_left];
-        }
-        nums[p_left] = key;
-        partition(nums, left, p_left - 1);
-        partition(nums, p_right + 1, right);
-    }
-
     // 787. K 站中转内最便宜的航班 - 广度优先搜索 - 超限
 //    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
 //        List<List<int[]>> ordered_flights = getOrderedFlights(flights);
@@ -1009,6 +991,27 @@ public class Solution {
 //        int[][] next_lines = ordered_flights.get(des).toArray(new int[size][3]);
 //        return next_lines;
 //    }
+
+    public void partition(int[] nums, int left, int right) {
+        if (nums.length == 1 || left == right)
+            return;
+        int key = nums[left];
+        int p_left = left, p_right = right;
+        // 相等时相当于需要把key放到对应的位置上，然后继续分治
+        while (p_left < p_right) {
+            while (p_left < p_right && nums[p_right] > key) {
+                p_right--;
+            }
+            nums[p_left++] = nums[p_right];
+            while (p_left < p_right && nums[p_left] <= key) {
+                p_left++;
+            }
+            nums[p_right--] = nums[p_left];
+        }
+        nums[p_left] = key;
+        partition(nums, left, p_left - 1);
+        partition(nums, p_right + 1, right);
+    }
 
     public int findKthLargest_MaxHeap(int[] nums, int k) {
         // 建堆
@@ -1191,6 +1194,383 @@ public class Solution {
         int restDays = n % 7;
         Double result = 3.5 * wholeWeeks * wholeWeeks + 24.5 * wholeWeeks + restDays * (wholeWeeks + 1.0) + (restDays - 1.0) * restDays / 2.0;
         return result.intValue();
+    }
+
+    public int countVowelPermutation(int n) {
+        int factor = (int) 1e9 + 7;
+        int a = 1, e = 1, i = 1, o = 1, u = 1;
+        while (--n != 0) {
+            int aa = e + i + u;
+            int ee = a + i;
+            int ii = e + o;
+            int oo = i;
+            int uu = i + o;
+            a = aa;
+            e = ee;
+            i = ii;
+            o = oo;
+            u = uu;
+        }
+        return (a + e + i + o + u) % factor;
+    }
+
+//    public int getVowelPermutationCount(int n, String curr) {
+//        int count = 0;
+//        int lastIndex = curr.length() - 1;
+//        if (n != 0) {
+//            if (curr.charAt(lastIndex) == 'a') {
+//                count += getVowelPermutationCount(n - 1, curr + "e");
+//            } else if (curr.charAt(lastIndex) == 'e') {
+//                count += getVowelPermutationCount(n - 1, curr + "a");
+//                count += getVowelPermutationCount(n - 1, curr + "i");
+//            } else if (curr.charAt(lastIndex) == 'i') {
+//                count += getVowelPermutationCount(n - 1, curr + "a");
+//                count += getVowelPermutationCount(n - 1, curr + "e");
+//                count += getVowelPermutationCount(n - 1, curr + "o");
+//                count += getVowelPermutationCount(n - 1, curr + "u");
+//            } else if (curr.charAt(lastIndex) == 'o') {
+//                count += getVowelPermutationCount(n - 1, curr + "i");
+//                count += getVowelPermutationCount(n - 1, curr + "u");
+//            } else {
+//                count += getVowelPermutationCount(n - 1, curr + "a");
+//            }
+//        } else {
+//            count = 1;
+//        }
+//
+//        return count % vowel_factor;
+//    }
+
+    public List<Integer> getTimeList(List<String> timePoints) {
+        List<Integer> timeList = new ArrayList<>();
+        for (String time : timePoints) {
+            String[] splitTime = time.split(":");
+            timeList.add(Integer.parseInt(splitTime[0]) * 60 + Integer.parseInt(splitTime[1]));
+            timeList.add(1440 + Integer.parseInt(splitTime[0]) * 60 + Integer.parseInt(splitTime[1]));
+        }
+        return timeList;
+    }
+
+    public int findMinDifference(List<String> timePoints) {
+        if (timePoints.size() > 1440) {
+            return 0;
+        }
+
+        List<Integer> list = getTimeList(timePoints);
+        Collections.sort(list);
+
+        int min = 1440;
+        for (int i = 0; i < list.size() - 1; i++) {
+            if (list.get(i + 1) - list.get(i) < min) {
+                min = list.get(i + 1) - list.get(i);
+            }
+        }
+
+        return min;
+    }
+
+    public int secondMinimum(int n, int[][] edges, int time, int change) {
+
+        List<Integer>[] map = new List[n + 1];
+        boolean[] valid = new boolean[n + 1];
+        boolean[] visited = new boolean[n + 1];
+        for (int i = 0; i <= n; i++) {
+            map[i] = new LinkedList<Integer>();
+            valid[i] = true;
+            visited[i] = false;
+        }
+        for (int[] edge : edges) {
+            map[edge[0]].add(edge[1]);
+            map[edge[1]].add(edge[0]);
+        }
+
+        // 每个点最多遍历两次
+        Set<Integer> set = new HashSet<>();
+        set.add(1);
+        int count = 0;
+        int level = 0;
+        boolean flag = false;
+        while (count < 2) {
+            level++;
+            Set<Integer> temp = new HashSet<>();
+            for (int index : set) {
+                if (valid[index]) {
+                    if (!visited[index]) {
+                        temp.addAll(map[index]);
+                        if (temp.size() >= n)
+                            break;
+                        if (flag && temp.contains(n))
+                            break;
+                        visited[index] = true;
+                    } else {
+                        valid[index] = false;
+                    }
+
+                }
+            }
+            if (temp.contains(n)) {
+                count++;
+                flag = true;
+            } else if (flag) {
+                level = level + 1;
+            }
+            set = temp;
+        }
+
+        int result = 0;
+        while (level-- > 0) {
+            result += time;
+            if (level != 0 && (result / change) % 2 != 0) {
+                result = change * (result / change + 1);
+            }
+        }
+
+        return result;
+    }
+
+    public int numberOfWeakCharacters(int[][] properties) {
+        int count = 0;
+        int index = 1;
+        Arrays.sort(properties, (a1, a2) -> a2[0] - a1[0]);
+        int[] compareTarget = new int[]{properties[0][0], properties[0][1]};
+        int[] nextCompareTarget = null;
+
+        // 初始化compareTarget
+        while (index < properties.length && compareTarget[0] == properties[index][0]) {
+            if (properties[index][1] > compareTarget[1]) {
+                compareTarget[1] = properties[index][1];
+            }
+            index++;
+        }
+
+        for (int i = index; i < properties.length; i++) {
+            if (properties[i][0] != properties[i - 1][0] && nextCompareTarget != null) {
+                compareTarget = nextCompareTarget;
+                nextCompareTarget = null;
+            }
+            // 判断防御力大小，小的直接淘汰，大的比较是否能够成为nextCompareTarget
+            if (properties[i][1] < compareTarget[1]) {
+                count++;
+            } else {
+                if (nextCompareTarget == null) {
+                    nextCompareTarget = properties[i];
+                } else {
+                    if (nextCompareTarget[1] < properties[i][1]) {
+                        nextCompareTarget = properties[i];
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public String convert(String s, int numRows) {
+        if (numRows == 1) {
+            return s;
+        }
+
+        List<List<Character>> lists = new ArrayList<>();
+        int index = 0;
+        boolean flag = false;
+        for (int i = 0; i < numRows; i++) {
+            lists.add(new LinkedList<>());
+        }
+
+        for (Character c : s.toCharArray()) {
+            lists.get(index).add(c);
+            if (index == 0) {
+                index++;
+                flag = false;
+            } else if (index == numRows - 1) {
+                index--;
+                flag = true;
+            } else {
+                if (flag) {
+                    index--;
+                } else {
+                    index++;
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (List<Character> list : lists) {
+            for (char c : list.toArray(new Character[0])) {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public String intToRoman(int num) {
+        int[] values = new int[]{1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000};
+        String[] symbols = new String[]{"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"};
+        StringBuilder sb = new StringBuilder();
+        while (num != 0) {
+            for (int i = values.length - 1; i >= 0; i--) {
+                if (num >= values[i]) {
+                    sb.append(symbols[i]);
+                    num = num - values[i];
+                    break;
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public int[][] highestPeak(int[][] isWater) {
+        if (isWater == null) {
+            return null;
+        }
+
+        int m = isWater.length, n = isWater[0].length;
+        int[][] result = new int[m][n];
+        int[][] offsets = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        Deque<int[]> deque = new LinkedList<>();
+
+        for (int[] r : result) {
+            Arrays.fill(r, Integer.MAX_VALUE);
+        }
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (isWater[i][j] == 1) {
+                    deque.offerLast(new int[]{i, j});
+                    result[i][j] = 0;
+                }
+            }
+        }
+
+        while (!deque.isEmpty()) {
+            int size = deque.size();
+            while (size-- > 0) {
+                int[] p = deque.poll();
+                System.out.println(Arrays.toString(deque.toArray(new int[0][0])));
+                for (int[] offset : offsets) {
+                    assert p != null;
+                    int x = p[0] + offset[0], y = p[1] + offset[1];
+                    if (x > 0 && x < m - 1 && y > 0 && y < n - 1) {
+                        if (result[x][y] == Integer.MAX_VALUE) {
+                            deque.offerLast(new int[]{x, y});
+                            result[x][y] = result[p[0]][p[1]] + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+//    该算法超时
+//    public int[][] highestPeak(int[][] isWater) {
+//        if (isWater == null) {
+//            return null;
+//        }
+//
+//        int m = isWater.length, n = isWater[0].length;
+//        int[][] result = new int[m][n];
+//        for (int[] r : result) {
+//            Arrays.fill(r, Integer.MAX_VALUE);
+//        }
+//        List<int[]> waterMap = new ArrayList<>();
+//        for (int i = 0; i < m; i++) {
+//            for (int j = 0; j < n; j++) {
+//                if (isWater[i][j] == 1) {
+//                    waterMap.add(new int[]{i, j});
+//                    result[i][j] = 0;
+//                }
+//            }
+//        }
+//
+//        for (int i = 0; i < m; i++) {
+//            for (int j = 0; j < n; j++) {
+//                if (isWater[i][j] == 0) {
+//                    for (int[] waterPosition : waterMap) {
+//                        int distance = Math.abs(i - waterPosition[0]) + Math.abs(j - waterPosition[1]);
+//                        if (distance < result[i][j])
+//                            result[i][j] = distance;
+//                    }
+//                }
+//            }
+//        }
+//
+//        return result;
+//    }
+
+    public int[][] processWater(int i, int j, int[][] result) {
+        if (i > 0) {
+            result[i - 1][j] = 1;
+        }
+        if (i < result.length - 1) {
+            result[i + 1][j] = 1;
+        }
+        if (j > 0) {
+            result[i][j - 1] = 1;
+        }
+        if (j < result[i].length - 1) {
+            result[i][j + 1] = 1;
+        }
+
+        return result;
+    }
+
+    public String[] uncommonFromSentences(String s1, String s2) {
+        String[] strs1 = s1.split(" "), strs2 = s2.split(" ");
+        Map<String, Integer> map1 = new HashMap<>();
+        Map<String, Integer> map2 = new HashMap<>();
+
+        for (String s : strs1) {
+            map1.put(s, map1.getOrDefault(s, 0) + 1);
+        }
+        for (String s : strs2) {
+            map2.put(s, map2.getOrDefault(s, 0) + 1);
+        }
+
+        List<String> result = new LinkedList<>();
+        for (String key : map1.keySet()) {
+            if (map1.get(key) == 1 && !map2.containsKey(key))
+                result.add(key);
+        }
+        for (String key : map2.keySet()) {
+            if (map2.get(key) == 1 && !map1.containsKey(key))
+                result.add(key);
+        }
+
+        return result.toArray(new String[0]);
+    }
+
+    public String longestNiceSubstring(String s) {
+        int maxPos = 0, maxLen = 0;
+        for (int i = 0; i < s.length(); i++){
+            int lower = 0, upper = 0;
+            for(int j = i; j < s.length(); j++){
+                char c = s.charAt(j);
+                if (Character.isLowerCase(c)){
+                    lower = lower | 1 << c - 'a';
+                } else {
+                    upper = upper | 1 << c - 'A';
+                }
+                if (lower == upper && j - i + 1 > maxLen) {
+                    maxPos = i;
+                    maxLen = j - i + 1;
+                }
+            }
+        }
+        return s.substring(maxPos, maxPos + maxLen);
+    }
+
+    public String reversePrefix(String word, char ch) {
+        int index = word.indexOf(ch);
+        if (index != -1){
+            StringBuilder sb = new StringBuilder();
+            sb.append(word, 0, index + 1);
+            sb.reverse();
+            sb.append(word, index + 1, word.length());
+            return sb.toString();
+        }
+        return word;
     }
 
     public static class ListNode {
@@ -1414,6 +1794,5 @@ public class Solution {
             this.mSum = m;
             this.tSum = t;
         }
-
     }
 }
