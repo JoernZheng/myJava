@@ -1,6 +1,5 @@
 package com.yaowen.myJava;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -285,51 +284,6 @@ public class Solution {
         }
         findTargetSumWaysDFS(nums, start + 1, end, target - nums[start]);
         findTargetSumWaysDFS(nums, start + 1, end, target + nums[start]);
-    }
-
-    public List<List<Integer>> threeSum(int[] nums) {
-        List<List<Integer>> result_list = new LinkedList<>();
-        if (nums.length < 3)
-            return result_list;
-        // 排序
-        Arrays.sort(nums);
-        System.out.println(Arrays.toString(nums));
-        // 标定正负的分界线
-        // 对应的数值要么是0，要么是负数
-        int zero_point = -1;
-        for (int i = 0; i < nums.length - 1; i++) {
-            if (nums[i] <= 0 && nums[i + 1] > 0) {
-                zero_point = i;
-                break;
-            }
-        }
-        // 全正数或者全负数直接结束
-        // it means all numbers are positive or negative
-        if (zero_point == -1) {
-            return result_list;
-        }
-        // start algorithm
-        // 当搜索到指定位置时没有合适的内容则直接返回，即前元素<0，后元素>0
-        for (int i = 0; i <= zero_point; i++) {
-            if (i > 0 && nums[i] == nums[i - 1]) {
-                continue;
-            }
-            for (int j = zero_point + 1; j < nums.length; j++) {
-                if (j > 0 && nums[j] == nums[j - 1]) {
-                    continue;
-                }
-                int third_number_index = findThirdNumber(nums, i, j, zero_point);
-                if (third_number_index > 0) {
-                    List<Integer> sub_result = new LinkedList<>();
-                    sub_result.add(nums[i]);
-                    sub_result.add(nums[j]);
-                    sub_result.add(nums[third_number_index]);
-                    result_list.add(sub_result);
-                }
-            }
-        }
-        System.out.println(result_list);
-        return result_list;
     }
 
     public int findThirdNumber(int[] nums, int i, int j, int zero_point) {
@@ -1543,11 +1497,11 @@ public class Solution {
 
     public String longestNiceSubstring(String s) {
         int maxPos = 0, maxLen = 0;
-        for (int i = 0; i < s.length(); i++){
+        for (int i = 0; i < s.length(); i++) {
             int lower = 0, upper = 0;
-            for(int j = i; j < s.length(); j++){
+            for (int j = i; j < s.length(); j++) {
                 char c = s.charAt(j);
-                if (Character.isLowerCase(c)){
+                if (Character.isLowerCase(c)) {
                     lower = lower | 1 << c - 'a';
                 } else {
                     upper = upper | 1 << c - 'A';
@@ -1563,7 +1517,7 @@ public class Solution {
 
     public String reversePrefix(String word, char ch) {
         int index = word.indexOf(ch);
-        if (index != -1){
+        if (index != -1) {
             StringBuilder sb = new StringBuilder();
             sb.append(word, 0, index + 1);
             sb.reverse();
@@ -1571,6 +1525,230 @@ public class Solution {
             return sb.toString();
         }
         return word;
+    }
+
+    public List<String> letterCombinations(String digits) {
+        if (digits.length() == 0)
+            return new LinkedList<>();
+
+        String[] ss = new String[]{"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        int offset = 2;
+        List<String> result = new LinkedList<>();
+        String init = "";
+        result.add(init);
+
+        for (char c : digits.toCharArray()) {
+            int index = Integer.parseInt(String.valueOf(c)) - offset;
+            int length = ss[index].length();
+            List<String> temp = result;
+            result = new LinkedList<>();
+            for (int i = 0; i < length; i++) {
+                for (String s : temp) {
+                    result.add(s + String.valueOf(ss[index].charAt(i)));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // LC-8 字符串转化
+    // 其它思路：自动机、
+    public int myAtoi(String s) {
+        if (s == null || s.length() == 0)
+            return 0;
+
+        int validIndex = 0;
+        int finalResult = 0;
+        int MAX = 2147483647;
+        int MIN = -2147483648;
+        boolean negative = false;
+        for (char c : s.toCharArray()) {
+            if (c == ' ')
+                validIndex++;
+            else
+                break;
+        }
+
+        if (validIndex < s.length() && s.charAt(validIndex) == '-') {
+            negative = true;
+            validIndex++;
+        } else if (validIndex < s.length() && s.charAt(validIndex) == '+') {
+            validIndex++;
+        }
+
+        // System.out.println(negative + "   " + validIndex);
+
+        while (validIndex < s.length() && Character.isDigit(s.charAt(validIndex))) {
+            if (!negative && (finalResult > MAX / 10 || finalResult == MAX / 10 && s.charAt(validIndex) > '7')) {
+                return MAX;
+            } else if (negative && (finalResult > MAX / 10 || finalResult == MAX / 10 && s.charAt(validIndex) > '8')) {
+                return MIN;
+            }
+            finalResult = finalResult * 10 + s.charAt(validIndex++) - '0';
+        }
+
+        if (negative)
+            return -finalResult;
+        else
+            return finalResult;
+    }
+
+    public List<List<Integer>> threeSum(int[] nums) {
+        if (nums == null || nums.length < 3)
+            return new LinkedList<>();
+
+        List<List<Integer>> result = new LinkedList<>();
+        Set<ThreeSumClass> set = new HashSet<>();
+
+        Arrays.sort(nums);
+        for (int i = 0; i < nums.length - 2; i++) {
+            for (int j = i + 1; j < nums.length - 1; j++) {
+                int k = Arrays.binarySearch(nums, j + 1, nums.length, -(nums[i] + nums[j]));
+                if (k > j) {
+                    set.add(new ThreeSumClass(nums[i], nums[j], nums[k]));
+                }
+            }
+        }
+
+        for (ThreeSumClass a : set) {
+            result.add(a.toList());
+        }
+
+        return result;
+    }
+
+    public int hammingWeight(int n) {
+        System.out.println(Integer.bitCount(10));
+        return 0;
+    }
+
+    public int networkBecomesIdle(int[][] edges, int[] patience) {
+        int[] sp = getSP(edges);
+        int[] times = computeTotalTime(sp, patience);
+        int maxTime = -1;
+        for (int time : times) {
+            if (time > maxTime)
+                maxTime = time;
+        }
+        return maxTime + 1;
+    }
+
+    public int[] getSP(int[][] edges) {
+        // 计算每个节点到达节点0的最短路径的长度
+        Map<Integer, Queue<Integer>> map = new HashMap<>();
+        for (int[] edge : edges) {
+            if (map.containsKey(edge[0])) {
+                map.get(edge[0]).add(edge[1]);
+            } else {
+                Queue<Integer> queue = new LinkedList<>();
+                queue.add(edge[1]);
+                map.put(edge[0], queue);
+            }
+            if (map.containsKey(edge[1])) {
+                map.get(edge[1]).add(edge[0]);
+            } else {
+                Queue<Integer> queue = new LinkedList<>();
+                queue.add(edge[0]);
+                map.put(edge[1], queue);
+            }
+        }
+
+        // 利用BFS来实现最短路径的查找
+        int[] sp = new int[map.size()];
+        boolean[] visited = new boolean[map.size()];
+        visited[0] = true;
+        int currLevel = 0;
+        Queue<Integer> queue = map.get(0);
+        while (!queue.isEmpty()) {
+            currLevel++;
+            int size = queue.size();
+            while (size-- > 0) {
+                if (visited[queue.peek()])
+                    continue;
+                sp[queue.peek()] = currLevel;
+                visited[queue.peek()] = true;
+                Queue<Integer> tempQueue = map.get(queue.poll());
+                while (!tempQueue.isEmpty()) {
+                    queue.add(tempQueue.poll());
+                }
+            }
+        }
+        return sp;
+    }
+
+    public int[] computeTotalTime(int[] sp, int[] patience) {
+        int[] totalTime = new int[sp.length];
+        for (int i = 1; i < sp.length; i++) {
+            int offset = ((2 * sp[i]) % patience[i]) == 0 ? -1 : 0;
+            totalTime[i] = (2 * sp[i] / patience[i] + offset) * patience[i] + 2 * sp[i];
+        }
+        return totalTime;
+    }
+
+    public boolean winnerOfGame(String colors) {
+        if (colors.length() <= 2)
+            return false;
+
+        int aCount = getCount(colors, 'A');
+        int bCount = getCount(colors, 'B');
+        return aCount - bCount > 0;
+    }
+
+    public int getCount(String colors, char target) {
+        char[] cs = colors.toCharArray();
+        int count = 0, currCount = 0;
+
+        for (int i = 0; i < colors.length(); i++) {
+            if (currCount < 2 && cs[i] == target) {
+                currCount++;
+            } else if (cs[i] == target) {
+                count++;
+            } else if (cs[i] != target) {
+                currCount = 0;
+            }
+        }
+
+        return count;
+    }
+
+    public boolean hasAlternatingBits(int n) {
+        int test = 1;
+        int last = (n & test) == 1 ? 0 : 1;
+        while (n != 0) {
+            if ((n & test) == last) {
+                return false;
+            }
+            last = n & test;
+            n = n >> 1;
+        }
+        return true;
+    }
+
+    public boolean canReorderDoubled(int[] arr) {
+        Arrays.sort(arr);
+        Map<Integer, Integer> map = new LinkedHashMap<>();
+        for (int a : arr) {
+            map.put(a, map.getOrDefault(a, 0) + 1);
+        }
+        for (int k : map.keySet()) {
+            int doubleK = 2 * k;
+            if (map.containsKey(doubleK)) {
+                int kValue = map.get(k);
+                int doubleKValue = map.get(doubleK);
+                int newKValue = doubleKValue > kValue ? 0 : kValue - doubleKValue;
+                int newDoubleKValue = newKValue == 0 ? doubleKValue - kValue : 0;
+                map.put(k, newKValue);
+                map.put(doubleK, newDoubleKValue);
+                System.out.println(map);
+            }
+        }
+        for (int k : map.keySet()) {
+            if (map.get(k) != 0)
+                return false;
+        }
+
+        return true;
     }
 
     public static class ListNode {
@@ -1600,6 +1778,38 @@ public class Solution {
             this.val = val;
             this.left = left;
             this.right = right;
+        }
+    }
+
+    class ThreeSumClass {
+        int i, j, k;
+
+        ThreeSumClass(int i, int j, int k) {
+            this.i = i;
+            this.j = j;
+            this.k = k;
+        }
+
+        List<Integer> toList() {
+            List<Integer> list = new LinkedList<>();
+            list.add(i);
+            list.add(j);
+            list.add(k);
+            return list;
+        }
+
+        // Hash是否相等的关键在于定义Equals
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ThreeSumClass that = (ThreeSumClass) o;
+            return i == that.i && j == that.j && k == that.k;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(i, j, k);
         }
     }
 
@@ -1795,4 +2005,47 @@ public class Solution {
             this.tSum = t;
         }
     }
+
+    class NumArray {
+        int[] tree;
+        int[] nums;
+
+        public NumArray(int[] nums) {
+            this.nums = nums;
+            tree = new int[nums.length + 1];
+            for (int i = 0; i < nums.length; i++) {
+                add(i + 1, nums[i]);
+            }
+        }
+
+        public void update(int index, int val) {
+            add(index + 1, val - nums[index]);
+            nums[index] = val;
+        }
+
+        public int sumRange(int left, int right) {
+            return prefixSum(right + 1) - prefixSum(left);
+        }
+
+        public int lowBit(int x) {
+            return x & -x;
+        }
+
+        public void add(int index, int val) {
+            while (index < tree.length) {
+                tree[index] += val;
+                index = index + lowBit(index);
+            }
+        }
+
+        public int prefixSum(int index) {
+            int sum = 0;
+            while (index > 0) {
+                sum += tree[index];
+                index -= lowBit(index);
+            }
+            return sum;
+        }
+    }
+
 }
