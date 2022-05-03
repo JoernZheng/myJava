@@ -1751,6 +1751,116 @@ public class Solution {
         return true;
     }
 
+    public int divide(int dividend, int divisor) {
+        boolean rev = (dividend >> 31 ^ divisor >> 31) == 0;  // true = positive
+        if (dividend == 0) {
+            return 0;
+        } else if (dividend == Integer.MIN_VALUE) {
+            if (divisor == 1) {
+                return Integer.MIN_VALUE;
+            } else if (divisor == -1) {
+                return Integer.MAX_VALUE;
+            }
+        }
+
+        if (divisor == Integer.MIN_VALUE) {
+            return dividend == Integer.MIN_VALUE ? 1 : 0;
+        }
+
+        int left = 1, right = dividend;
+        int mid = left + ((right - left) >> 1);
+        int ans = 0;
+        while (left <= right) {
+            if (divideChecker(dividend, divisor, mid)) {
+                ans = mid;
+                if (mid == Integer.MAX_VALUE) {
+                    break;
+                }
+                left = left + 1;
+            } else {
+                right = right + 1;
+            }
+        }
+        return rev ? ans : -ans;
+    }
+
+    public boolean divideChecker(int dividend, int divisor, int n) {
+        int result = 0, add = divisor;
+        while (n != 0) {
+            System.out.println(n);
+            if ((n & 1) != 0) {
+                if (result < dividend - add)
+                    return false;
+                result += add;
+            }
+            if (n != 1) {
+                if (add < dividend - add)
+                    return false;
+                add += add;
+            }
+            n = n >> 1;
+        }
+        return true;
+    }
+
+    public int lengthLongestPath(String input) {
+        if (!input.contains(".")) {
+            return 0;
+        }
+
+        input = "/" + input;
+
+        input = input.replace("\n", "\n\t")
+                .replace("\n", "")
+                .replace("\t", "/");
+        int nextLevel = 0;
+        int currentLevel = 0;
+        int max = 0;
+        StringBuilder sb = new StringBuilder();
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < input.length(); i++) {
+            char curr = input.charAt(i);
+            if (curr != '/') {
+                sb.append(curr);
+            } else {
+                list.add(sb.length());
+                nextLevel++;
+                while (input.charAt(i + 1) == '/') {
+                    nextLevel++;
+                    i++;
+                }
+
+                if (nextLevel <= currentLevel) {
+                    if (sb.indexOf(".") != -1) {
+                        max = Math.max(getNewLength(list), max);
+                    }
+                    while (list.size() > nextLevel) {
+                        list.remove(list.size() - 1);
+                    }
+                }
+
+                sb = new StringBuilder();
+                currentLevel = nextLevel;
+                nextLevel = 0;
+            }
+        }
+
+        if (sb.indexOf(".") != -1) {
+            list.add(sb.length());
+            max = Math.max(getNewLength(list), max);
+        }
+
+        return max;
+    }
+
+    public int getNewLength(List<Integer> list) {
+        int result = 0;
+        for (int n : list) {
+            result += n;
+        }
+        return result + list.size() - 2;
+    }
+
     public static class ListNode {
         int val;
         ListNode next;
@@ -2045,6 +2155,51 @@ public class Solution {
                 index -= lowBit(index);
             }
             return sum;
+        }
+    }
+
+    class RandomizedSet {
+        Map<Integer, Integer> map;
+        int[] array;
+        Random random;
+        int index;
+
+        public RandomizedSet() {
+            map = new HashMap<>();
+            array = new int[8];
+            index = 0;
+            random = new Random();
+        }
+
+        public boolean insert(int val) {
+            if (map.containsKey(val)) {
+                return false;
+            }
+            if (index >= array.length) {
+                int[] temp = new int[array.length * 2];
+                System.arraycopy(array, 0, temp, 0, index);
+                array = temp;
+            }
+            map.put(val, index);
+            array[index++] = val;
+            return true;
+        }
+
+        public boolean remove(int val) {
+            if (map.containsKey(val)) {
+                int targetIndex = map.get(val);
+                array[targetIndex] = array[index - 1];
+                map.put(array[targetIndex], targetIndex);
+                map.remove(val);
+                index--;
+                return true;
+            }
+            return false;
+        }
+
+        public int getRandom() {
+            int randomIndex = random.nextInt(index);
+            return array[randomIndex];
         }
     }
 
