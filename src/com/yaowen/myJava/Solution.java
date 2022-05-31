@@ -2202,4 +2202,42 @@ public class Solution {
             return array[randomIndex];
         }
     }
+
+    class MakeSquare {
+        public boolean makesquare(int[] matchsticks) {
+            if (matchsticks.length < 4)
+                return false;
+
+            Arrays.sort(matchsticks);
+            for (int i = 0, j = matchsticks.length - 1; i < j; i++, j--) {
+                int temp = matchsticks[i];
+                matchsticks[i] = matchsticks[j];
+                matchsticks[j] = temp;
+            }
+
+            int perimeter = 0, sideLength = 0;
+            perimeter = Arrays.stream(matchsticks).sum();
+            sideLength = perimeter / 4;
+            if (perimeter % 4 != 0 || matchsticks[matchsticks.length - 1] > sideLength)
+                return false;
+
+            int[] edges = new int[]{0, 0, 0, 0};
+            return validator(matchsticks, 0, sideLength, edges);
+        }
+
+        public boolean validator(int[] matchsticks, int index, int sideLength, int[] edges) {
+            if (index == matchsticks.length)
+                return true;
+
+            for (int i = 0; i < edges.length; i++) {
+                edges[i] += matchsticks[index];
+                if (edges[i] <= sideLength && validator(matchsticks, index + 1, sideLength, edges)) {
+                    return true;
+                }
+                edges[i] -= matchsticks[index];
+            }
+
+            return false;
+        }
+    }
 }
