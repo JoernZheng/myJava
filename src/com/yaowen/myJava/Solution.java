@@ -2202,5 +2202,4 @@ public class Solution {
             return array[randomIndex];
         }
     }
-
 }
