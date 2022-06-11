@@ -1,7 +1,10 @@
 package com.yaowen.myJava;
 
+import org.junit.Assert;
+
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -2240,4 +2243,347 @@ public class Solution {
             return false;
         }
     }
+
+    public TreeNode deleteNode(TreeNode root, int key) {
+        TreeNode curr = root;
+        TreeNode father = null;
+        while (curr != null) {
+            if (curr.val == key) {
+                curr = buildNewBST(curr.left, curr.right);
+                if (father != null) {
+                    if (father.left != null && father.left.val == key) {
+                        father.left = curr;
+                    } else {
+                        father.right = curr;
+                    }
+                } else {
+                    root = curr;
+                }
+                return root;
+            }
+
+            if (key < curr.val) {
+                father = curr;
+                curr = curr.left;
+            } else {
+                father = null;
+                curr = curr.right;
+            }
+        }
+        return root;
+    }
+
+    public TreeNode buildNewBST(TreeNode left, TreeNode right) {
+        if (left == null)
+            return right;
+        if (right == null)
+            return left;
+
+        TreeNode temp = left;
+        TreeNode tempFather = null;
+        while (temp.left != null || left.right != null) {
+            tempFather = temp;
+            if (temp.left != null) {
+                temp = temp.left;
+            } else {
+                temp = temp.right;
+            }
+        }
+
+        if (tempFather.left == temp) {
+            tempFather.left = null;
+        } else {
+            tempFather.right = null;
+        }
+
+        temp.left = left;
+        temp.right = right;
+        TreeNode resultRoot = temp;
+
+        while (true) {
+            if (temp.left != null && temp.left.val > temp.val) {
+                int swap = temp.val;
+                temp.val = temp.left.val;
+                temp.left.val = swap;
+                temp = temp.left;
+            } else if (temp.right != null && temp.right.val < temp.val) {
+                int swap = temp.val;
+                temp.val = temp.right.val;
+                temp.right.val = swap;
+                temp = temp.right;
+            } else {
+                break;
+            }
+        }
+
+        return resultRoot;
+    }
+
+    static class MyLinkedList {
+        int size;
+        Node head;
+
+        public MyLinkedList() {
+            size = 0;
+            head = new Node();
+        }
+
+        public int get(int index) {
+            if (index >= size)
+                return -1;
+
+            Node curr = head.next;
+            while (index-- > 0) {
+                curr = curr.next;
+            }
+            return curr.val;
+        }
+
+        public void addAtHead(int val) {
+            head.next = new Node(val, head.next);
+            size++;
+        }
+
+        public void addAtTail(int val) {
+            Node curr = head;
+            while (curr.next != null)
+                curr = curr.next;
+
+            curr.next = new Node(val);
+            size++;
+        }
+
+        public void addAtIndex(int index, int val) {
+            if (index == size) {
+                addAtTail(val);
+                return;
+            }
+
+            if (index > size)
+                return;
+
+            Node before = head, curr = head.next;
+            while (index-- > 0) {
+                before = curr;
+                curr = curr.next;
+            }
+
+            before.next = new Node(val, curr);
+            size++;
+        }
+
+        public void deleteAtIndex(int index) {
+            if (index > size - 1)
+                return;
+
+            Node before = head, curr = head.next;
+            while (index-- > 0) {
+                before = curr;
+                curr = curr.next;
+            }
+
+            before.next = curr.next;
+            curr.next = null;
+            size--;
+        }
+
+        static class Node {
+            public int val;
+            public Node next;
+
+            public Node() {
+            }
+
+            ;
+
+            public Node(int val) {
+                this.val = val;
+                next = null;
+            }
+
+            public Node(int val, Node next) {
+                this.val = val;
+                this.next = next;
+            }
+        }
+    }
+
+    public int numUniqueEmails(String[] emails) {
+        Set<String> emailSet = new HashSet<>();
+        for (String email : emails) {
+            String[] parts = email.split("@");
+            parts[0] = parts[0].split("\\+")[0].replace(".", "");
+            String newAddress = parts[0] + "@" + parts[1];
+            emailSet.add(newAddress);
+        }
+        return emailSet.size();
+    }
+
+    public ListNode detectCycle(ListNode head) {
+        Set<ListNode> set = new HashSet<>();
+        while (head != null) {
+            if (set.contains(head))
+                return head;
+            set.add(head);
+            head = head.next;
+        }
+
+        Random random = new Random();
+        random.nextDouble();
+
+        return null;
+    }
+
+    public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null)
+            return true;
+
+        ListNode slow = head, fast = head.next;
+        ListNode head1, head2 = null;
+        while (fast != null) {
+            slow = slow.next;
+            if (fast.next != null) {
+                fast = fast.next.next;
+                if (fast == null) {
+                    head2 = slow.next;
+                }
+            } else {
+                head2 = slow;
+                fast = null;
+            }
+        }
+
+        ListNode before = null, curr = head, later;
+        while (curr != null && curr != slow) {
+            later = curr.next;
+            curr.next = before;
+            before = curr;
+            curr = later;
+        }
+
+        head1 = before;
+        while (head1 != null && head2 != null) {
+            if (head1.val != head2.val)
+                return false;
+            head1 = head1.next;
+            head2 = head2.next;
+        }
+
+        return true;
+    }
+
+    static class MyCalendarThree {
+        private final TreeMap<Integer, Integer> cnt;
+
+        public MyCalendarThree() {
+            cnt = new TreeMap<>();
+        }
+
+        public int book(int start, int end) {
+            int ans = 0;
+            int maxBook = 0;
+            cnt.put(start, cnt.getOrDefault(start, 0) + 1);
+            cnt.put(end, cnt.getOrDefault(end, 0) - 1);
+            for (Map.Entry<Integer, Integer> entry : cnt.entrySet()) {
+                int freq = entry.getValue();
+                maxBook += freq;
+                ans = Math.max(maxBook, ans);
+            }
+            return ans;
+        }
+    }
+
+    public int minEatingSpeed(int[] piles, int h) {
+        if (piles == null || piles.length == 0)
+            return 0;
+
+        int total = 0;
+        for (int pile : piles) {
+            total += pile;
+        }
+
+        return getMinSpeed(piles, h, 0, total);
+    }
+
+    public int getMinSpeed(int[] piles, int h, int minSpeed, int maxSpeed) {
+        if (minSpeed > maxSpeed)
+            return Integer.MAX_VALUE;
+
+        int midSpeed = (minSpeed + maxSpeed) / 2;
+
+        int eatingHours = 0;
+        for (int pile : piles) {
+            eatingHours += pile / midSpeed;
+            if (pile % midSpeed != 0) {
+                eatingHours += 1;
+            }
+        }
+
+        if (minSpeed == maxSpeed && eatingHours > h)
+            return Integer.MAX_VALUE;
+
+        if (eatingHours > h) {
+            return getMinSpeed(piles, h, midSpeed + 1, maxSpeed);
+        } else {
+            return Math.min(midSpeed, getMinSpeed(piles, h, minSpeed, midSpeed - 1));
+        }
+    }
+
+    class RandomPointInNonOverlappingRectangels {
+        private Random random;
+        private TreeMap<Integer, int[]> map;
+        private int totalArea;
+
+        public RandomPointInNonOverlappingRectangels(int[][] rects) {
+            random = new Random();
+            map = new TreeMap<>();
+            totalArea = Arrays.asList(rects).stream().mapToInt(x -> (x[3] - x[1]) * (x[2] - x[0])).sum();
+
+            int sum = 0;
+            for (int[] rect : rects) {
+                sum += (rect[3] - rect[1]) * (rect[2] - rect[0]);
+                map.put(sum, rect);
+            }
+        }
+
+        public int[] pick() {
+            int areaIndex = random.nextInt(totalArea + 1);
+            int[] rect = map.ceilingEntry(areaIndex).getValue();
+
+
+            int x = rect[0] + random.nextInt(rect[2] - rect[0] + 1);
+            int y = rect[1] + random.nextInt(rect[3] - rect[1] + 1);
+            return new int[]{x, y};
+        }
+    }
+
+    class DoubleLinkedNode {
+        public int val;
+        public DoubleLinkedNode prev;
+        public DoubleLinkedNode next;
+        public DoubleLinkedNode child;
+    }
+
+    public int minFlipsMonoIncr(String s) {
+        if (s.length() == 1)
+            return 0;
+
+        int[][] opt = new int[s.length() + 1][2];
+        opt[0][0] = 0;
+        opt[0][1] = 0;
+
+        for (int i = 1; i <= s.length(); i++) {
+            char c = s.charAt(i - 1);
+            if (c == '0') {
+                opt[i][0] = opt[i - 1][0];
+                opt[i][1] = Math.min(opt[i - 1][0], opt[i - 1][1]) + 1;
+            } else {
+                opt[i][0] = opt[i - 1][0] + 1;
+                opt[i][1] = Math.min(opt[i - 1][0], opt[i - 1][1]);
+            }
+        }
+
+        return Math.min(opt[s.length()][0], opt[s.length()][1]);
+    }
 }
+
