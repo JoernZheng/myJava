@@ -1,5 +1,6 @@
 package com.yaowen.myJava;
 
+import com.yaowen.myJava.DataStructure.Coordinate;
 import org.junit.Assert;
 
 import java.math.BigInteger;
@@ -1066,40 +1067,40 @@ public class Solution {
     /**
      * LC-498 对角线遍历
      */
-    public int[] findDiagonalOrder(int[][] mat) {
-        int x = 0, y = 0;
-        int length = mat.length - 1;
-        boolean flag = true;
-        int[] result = new int[mat.length * mat.length];
-        int index = 0;
-        while (x <= length || y <= length) {
-            System.out.println(Arrays.toString(result));
-            if (flag) {
-                result[index++] = mat[y--][x++];
-                if (y < 0 || x > length) {
-                    y = 0;
-                    flag = false;
-                    while (x > length) {
-                        x--;
-                        y++;
-                    }
-                }
-            } else {
-                System.out.println("x=" + x + "  y=" + y);
-                result[index++] = mat[y++][x--];
-                if (x < 0 || y > length) {
-                    x = 0;
-                    flag = true;
-                    while (y > length) {
-                        y--;
-                        x++;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
+//    public int[] findDiagonalOrder(int[][] mat) {
+//        int x = 0, y = 0;
+//        int length = mat.length - 1;
+//        boolean flag = true;
+//        int[] result = new int[mat.length * mat.length];
+//        int index = 0;
+//        while (x <= length || y <= length) {
+//            System.out.println(Arrays.toString(result));
+//            if (flag) {
+//                result[index++] = mat[y--][x++];
+//                if (y < 0 || x > length) {
+//                    y = 0;
+//                    flag = false;
+//                    while (x > length) {
+//                        x--;
+//                        y++;
+//                    }
+//                }
+//            } else {
+//                System.out.println("x=" + x + "  y=" + y);
+//                result[index++] = mat[y++][x--];
+//                if (x < 0 || y > length) {
+//                    x = 0;
+//                    flag = true;
+//                    while (y > length) {
+//                        y--;
+//                        x++;
+//                    }
+//                }
+//            }
+//        }
+//
+//        return result;
+//    }
 
     /**
      * LC-566 重塑矩阵
@@ -2585,5 +2586,259 @@ public class Solution {
 
         return Math.min(opt[s.length()][0], opt[s.length()][1]);
     }
+
+    public double calculateTax(int[][] brackets, int income) {
+        double tax = 0;
+        int calculatedIncome = 0;
+        for (int[] bracket : brackets) {
+            if (income == 0)
+                break;
+
+            if (calculatedIncome + income <= bracket[1]) {
+                tax += income * bracket[1] / 100.0;
+                return tax;
+            }
+
+            tax += (bracket[0] - calculatedIncome) * bracket[1] / 100.0;
+            calculatedIncome = bracket[0];
+        }
+
+        return tax;
+    }
+
+    public int minPathCost(int[][] grid, int[][] moveCost) {
+        int[][] result = new int[grid.length][grid[0].length];
+        for (int i = 0; i < result[0].length; i++) {
+            result[0][i] = grid[0][i];
+        }
+
+        for (int i = 1; i < result.length; i++) {
+            for (int j = 0; j < result[i].length; j++) {
+                result[i][j] = Integer.MAX_VALUE;
+                // 遍历上层所有结果，找到最小
+                for (int k = 0; k < result[i - 1].length; k++) {
+                    result[i][j] = Math.min(result[i][j], result[i - 1][k] + moveCost[grid[i - 1][k]][j]);
+                }
+                result[i][j] += grid[i][j];
+            }
+        }
+
+        int min = Integer.MAX_VALUE;
+        for (int curr : result[result.length - 1]) {
+            if (curr < min)
+                min = curr;
+        }
+
+        return min;
+    }
+
+    public List<String> findAndReplacePattern(String[] words, String pattern) {
+        List<String> result = new LinkedList<>();
+        for (String word : words) {
+            Map<Character, Character> p2w = new HashMap<>();
+            Map<Character, Character> w2p = new HashMap<>();
+            boolean fitPattern = true;
+            for (int i = 0; i < pattern.length(); i++) {
+                if (!p2w.containsKey(pattern.charAt(i)) && !w2p.containsKey(word.charAt(i))) {
+                    p2w.put(pattern.charAt(i), word.charAt(i));
+                    w2p.put(word.charAt(i), pattern.charAt(i));
+                } else if (!p2w.containsKey(pattern.charAt(i)) && w2p.containsKey(word.charAt(i))
+                        || p2w.containsKey(pattern.charAt(i)) && !w2p.containsKey(word.charAt(i))
+                        || p2w.get(pattern.charAt(i)) != word.charAt(i)
+                        || w2p.get(word.charAt(i)) != pattern.charAt(i)) {
+                    fitPattern = false;
+                    break;
+                }
+            }
+
+            if (fitPattern) {
+                result.add(word);
+            }
+        }
+
+        return result;
+    }
+
+    public int heightChecker(int[] heights) {
+        int count = 0;
+        int[] sortedHeights = Arrays.copyOf(heights, heights.length);
+        Arrays.sort(sortedHeights);
+        for (int i = 0; i < heights.length; i++) {
+            if (heights[i] != sortedHeights[i])
+                count++;
+        }
+
+        return count;
+    }
+
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        int heapSize = (nums1.length + nums2.length) / 2 + 1;
+        int currSize = 0;
+        int[] nums = combineArrays(nums1, nums2);
+        for (int i = 0; i < heapSize; i++) {
+            heap.add(nums[i]);
+        }
+        for (int i = heapSize; i < nums.length; i++) {
+            if (nums[i] > heap.peek()) {
+                heap.poll();
+                heap.add(nums[i]);
+            }
+        }
+
+        if (nums.length % 2 != 0) {
+            return heap.poll() / 1.0;
+        } else {
+            return (heap.poll() + heap.poll()) / 2.0;
+        }
+    }
+
+    public int[] combineArrays(int[] nums1, int[] nums2) {
+        int[] result = new int[nums1.length + nums2.length];
+        int index = 0;
+        while (index < nums1.length) {
+            result[index] = nums1[index];
+            index++;
+        }
+        while (index < nums1.length + nums2.length) {
+            result[index] = nums2[index - nums1.length];
+            index++;
+        }
+        return result;
+    }
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> result = new LinkedList<>();
+        if (root == null) {
+            return result;
+        }
+
+        Deque<TreeNode> deque = new LinkedList<>();
+        deque.add(root);
+
+        while (deque.size() > 0) {
+            int size = deque.size();
+            List<Integer> list = new LinkedList();
+            while (size-- > 0) {
+                TreeNode node = deque.pollFirst();
+                list.add(node.val);
+                if (node.left != null)
+                    deque.addLast(node.left);
+                if (node.right != null)
+                    deque.addLast(node.right);
+            }
+            result.add(list);
+        }
+
+        return result;
+    }
+
+    // LC-498 Diagonal Traverse
+    // 广度优先搜索，非模拟法。使用mark来记录访问状态。
+    public int[] findDiagonalOrder(int[][] mat) {
+        Deque<int[]> deque = new LinkedList<>();
+        int m = mat.length, n = mat[0].length;
+        List<Integer> result = new LinkedList<>();
+        boolean[][] mark = new boolean[m][n];
+
+        deque.add(new int[]{0, 0});
+        mark[0][0] = true;
+        boolean flag = true;
+
+        while (!deque.isEmpty()) {
+            int size = deque.size();
+            while (size-- > 0) {
+                int[] coordinate = deque.pollFirst();
+                int x = coordinate[0], y = coordinate[1];
+                result.add(mat[x][y]);
+                if (flag) {
+                    if (x < m - 1 && !mark[x + 1][y]) {
+                        deque.addLast(new int[]{x + 1, y});
+                        mark[x + 1][y] = true;
+                    }
+                    if (y < n - 1 && !mark[x][y + 1]) {
+                        deque.addLast(new int[]{x, y + 1});
+                        mark[x][y + 1] = true;
+                    }
+                } else {
+                    if (y < n - 1 && !mark[x][y + 1]) {
+                        deque.addLast(new int[]{x, y + 1});
+                        mark[x][y + 1] = true;
+                    }
+                    if (x < m - 1 && !mark[x + 1][y]) {
+                        deque.addLast(new int[]{x + 1, y});
+                        mark[x + 1][y] = true;
+                    }
+                }
+            }
+            flag = !flag;
+            deque = reverseDeque(deque);
+        }
+
+        return result.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private Deque<int[]> reverseDeque(Deque<int[]> deque) {
+        Deque<int[]> result = new LinkedList<>();
+        for (int[] e : deque) {
+            result.addFirst(e);
+        }
+        return result;
+    }
+
+    // LC-532 K-diff Pairs in an Array
+    public int findPairs(int[] nums, int k) {
+        if (nums == null || nums.length <= 1)
+            return 0;
+
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        int result = 0;
+
+        if (k == 0) {
+            for (int key : map.keySet()) {
+                if (map.get(key) > 1) {
+                    result++;
+                }
+            }
+            return result;
+        }
+
+        for (int n : nums) {
+            if (map.containsKey(n)) {
+                if (map.containsKey(n + k)) {
+                    result++;
+                    map.remove(n + k);
+                }
+                if (map.containsKey(n - k)) {
+                    result++;
+                    map.remove(n - k);
+                }
+            }
+        }
+
+        return result;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
